@@ -1,6 +1,6 @@
 # pcf-dotnet-environment-viewer
 
-To push this app, you need to download the diego plugin and deploy to an environment with .NET support.
+To push this app, you need to download the diego plugin and deploy to an environment with .NET support.  [Instructions Here.](https://github.com/cloudfoundry-incubator/diego-cli-plugin)
 
 The command to push.
 
