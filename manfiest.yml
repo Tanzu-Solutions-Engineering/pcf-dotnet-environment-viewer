@@ -1,0 +1,6 @@
+---
+applications:
+- name: environment
+  memory: 2g
+  path: ./ViewEnvironment/
+  buildpack: https://github.com/ryandotsmith/null-buildpack.git
