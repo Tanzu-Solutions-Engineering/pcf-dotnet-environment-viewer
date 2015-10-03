@@ -1,6 +1,6 @@
 ---
 applications:
-- name: environment
+- name: env
   memory: 2g
-  path: ./ViewEnvironment/
+  stack: windows2012R2
   buildpack: https://github.com/ryandotsmith/null-buildpack.git
