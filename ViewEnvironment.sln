@@ -8,20 +8,18 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ViewEnvironment(1)", "http:
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_49612"
-		Debug.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\Workshop\pcf-dotnet-environment-viewer\ViewEnvironment\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_49612\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_49612"
-		Release.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\Workshop\pcf-dotnet-environment-viewer\ViewEnvironment\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_49612\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
-		SlnRelativePath = "..\..\..\..\..\..\Workshop\pcf-dotnet-environment-viewer\ViewEnvironment\"
+		SlnRelativePath = "ViewEnvironment\"
 	EndProjectSection
 EndProject
 Global
