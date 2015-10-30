@@ -11,6 +11,13 @@ public partial class _Default : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        // Don't cache so a refresh will go to server
+        // Stop Caching in IE
+        Response.Cache.SetCacheability(HttpCacheability.NoCache);
+
+        // Stop Caching in Firefox
+        Response.Cache.SetNoStore();
+
         // Get environment variables and dump them
         IDictionary vars = System.Environment.GetEnvironmentVariables();
         System.Environment.GetEnvironmentVariables();
