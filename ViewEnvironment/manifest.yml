@@ -1,6 +1,7 @@
 ---
 applications:
 - name: env
-  memory: 2g
+  host: env-${random-word}
+  memory: 512m
   stack: windows2012R2
   buildpack: binary_buildpack
