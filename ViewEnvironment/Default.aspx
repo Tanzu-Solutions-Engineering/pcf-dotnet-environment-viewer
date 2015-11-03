@@ -21,13 +21,20 @@
             </li>
         </ul>
     </nav>
-
     <div class="row">
         <div class="large-12 columns">
             <h3>Welcome to Pivotal CF</h3>
             <hr/>
         </div>
-
+        
+        <div class="row" runat="server" visible="false" id="attendeePane">
+            <div class="large-12 columns">
+                <h3>All Attendees</h3>
+                <hr />
+                <asp:GridView ID="gridAttendees" runat="server">
+                </asp:GridView>
+                </div>
+        </div>
         <div class="row">
             <div class="large-12 columns">
                 <div class="panel">
@@ -59,8 +66,7 @@
                 <asp:Button ID="btnKill" runat="server" Text="Kill" CssClass="medium alert button" OnClick="btnKill_Click"/>
             </div>
         </div>
-
-        <script src="js/jquery.js"></script>
+                <script src="js/jquery.js"></script>
         <script src="js/foundation.min.js"></script>
         <script>
             $(document).foundation();

@@ -18,9 +18,9 @@ public class AttendeeRepository
         //
     }
 
-    public static void checkDatabaseForTables(string connectionString)
+    public static void checkDatabaseForTables()
     {
-        using (SqlConnection conn = new SqlConnection(connectionString))
+        using (SqlConnection conn = new SqlConnection(CurrentEnvironment.DbConnectionString))
         // if the table doesn't exist, create it
         using (SqlCommand command = new SqlCommand()
         {
@@ -70,11 +70,11 @@ public class AttendeeRepository
 
     }
 
-    public static List<Attendee> getAttendees(string cString)
+    public static List<Attendee> getAttendees()
     {
         List<Attendee> attendees = new List<Attendee>();
-       
-        using (SqlConnection conn = new SqlConnection(cString))
+
+        using (SqlConnection conn = new SqlConnection(CurrentEnvironment.DbConnectionString))
         // execute read
         using (SqlCommand command = new SqlCommand()
         {
@@ -114,7 +114,7 @@ public class AttendeeRepository
                     Phone = reader.GetString(7),
                     EmailAddress = reader.GetString(8)
                 };
-                 //address, city, state, zip_code, phone_number, email_address
+                //address, city, state, zip_code, phone_number, email_address
 
                 attendees.Add(thisAttendee);
             }

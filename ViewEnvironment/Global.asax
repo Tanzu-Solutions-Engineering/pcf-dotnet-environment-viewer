@@ -5,7 +5,13 @@
     void Application_Start(object sender, EventArgs e) 
     {
         // Code that runs on application startup
-
+        // if there is a database bound, check to make sure it has the proper tables
+        if (CurrentEnvironment.hasDbConnection)
+        {
+            // make sure tables exist
+            Console.WriteLine("Checking to see if tables exist.");
+            AttendeeRepository.checkDatabaseForTables();
+        }
     }
     
     void Application_End(object sender, EventArgs e) 

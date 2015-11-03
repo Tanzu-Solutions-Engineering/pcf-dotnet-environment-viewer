@@ -24,26 +24,28 @@ public partial class _Default : System.Web.UI.Page
         foreach (DictionaryEntry entry in vars)
         {
             // add to querystring all to dump all environment variables
-            if (Request.QueryString["all"]!=null)
+            if (Request.QueryString["all"] != null)
                 Response.Write(entry.Key + " = " + entry.Value + "<br>");
         }
 
-        lblTime.Text = DateTime.Now.ToString();
-        lblDotNetVersion.Text = Environment.Version.ToString();
-        lblPort.Text = Environment.GetEnvironmentVariable("PORT");
-        lblInstanceID.Text = Environment.GetEnvironmentVariable("INSTANCE_GUID");
-        lblInstanceIndex.Text = Environment.GetEnvironmentVariable("INSTANCE_INDEX");
-        lblInstanceStart.Text =  DateTime.Now.Subtract(TimeSpan.FromMilliseconds(Environment.TickCount)).ToString();
-        lblBoundServices.Text = Environment.GetEnvironmentVariable("VCAP_SERVICES");
+        lblTime.Text = CurrentEnvironment.CurrentTime;
+        lblDotNetVersion.Text = CurrentEnvironment.CLRVersion;
+        lblPort.Text = CurrentEnvironment.Port;
+        lblInstanceID.Text = CurrentEnvironment.InstanceID;
+        lblInstanceIndex.Text = CurrentEnvironment.InstanceIndex;
+        lblInstanceStart.Text = CurrentEnvironment.Uptime;
+        lblBoundServices.Text = CurrentEnvironment.BoundServices.ToString();
+
+        // if a database service is bound, show the attendees
+        if (CurrentEnvironment.hasDbConnection)
+        {
+            attendeePane.Visible = true;
+            gridAttendees.DataSource = AttendeeRepository.getAttendees();
+            gridAttendees.DataBind();
+        }
     }
     protected void btnKill_Click(object sender, EventArgs e)
     {
-        log("Kaboom.");
-        Environment.Exit(-1);
-    }
-
-    private void log(string message)
-    {
-        Console.WriteLine(message);
+        CurrentEnvironment.KillApp();
     }
 }
