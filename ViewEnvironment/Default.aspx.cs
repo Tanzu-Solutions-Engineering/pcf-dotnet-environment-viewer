@@ -39,13 +39,75 @@ public partial class _Default : System.Web.UI.Page
         // if a database service is bound, show the attendees
         if (CurrentEnvironment.hasDbConnection)
         {
-            attendeePane.Visible = true;
-            gridAttendees.DataSource = AttendeeRepository.getAttendees();
-            gridAttendees.DataBind();
+            AttendeeDataSource.ConnectionString = CurrentEnvironment.DbConnectionString;
+            // Read
+            AttendeeDataSource.SelectCommand = "select * from attendee";
+
+            // Delete
+            AttendeeDataSource.DeleteCommand = "delete from attendee where id=@id";
+            AttendeeDataSource.DeleteParameters.Add("id", System.Data.DbType.Int64, "0");
+
+            // Create
+            AttendeeDataSource.InsertCommand = @"INSERT INTO [dbo].[attendee]
+                    ([address]
+                    ,[city]
+                    ,[email_address]
+                    ,[first_name]
+                    ,[last_name]
+                    ,[phone_number]
+                    ,[state]
+                    ,[zip_code])
+                    VALUES
+                    ('101 W. Fifth St.'
+                    ,'Louisville'
+                    ,'user1@example.com'
+                    ,'Workshop'
+                    ,'Participant'
+                    ,'502-123-4567'
+                    ,'KY'
+                    ,'12345')";
+
+            // Update
+            /*AttendeeDataSource.UpdateCommand = @"update [dbo].[attendee]
+                    set [address] = @address
+                        ,[city] = @city
+                        ,[email_address] = @email_address
+                        ,[first_name] = @first_name
+                        ,[last_name] = @last_name
+                        ,[phone_number] = @phone_number
+                        ,[state] = @state
+                        ,[zip_code] = @zip_code
+                    WHERE id=@id";
+             */
+            /* parameters
+            AttendeeDataSource.UpdateParameters.Add("address", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("city", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("email_address", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("first_name", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("last_name", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("phone_number", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("state", System.Data.DbType.String, "");
+            AttendeeDataSource.UpdateParameters.Add("zip_code", System.Data.DbType.String, "");
+             */
+
+            if (!IsPostBack)
+            {
+                // Hidden by default, display
+                attendeePane.Visible = true;
+
+                //gridAttendees.DataSource = AttendeeRepository.getAttendees();
+                gridAttendees.DataKeyNames = new string[] { "id" };
+                gridAttendees.DataBind();
+            }
         }
     }
     protected void btnKill_Click(object sender, EventArgs e)
     {
         CurrentEnvironment.KillApp();
+    }
+    protected void btnAddAttendee_Click(object sender, EventArgs e)
+    {
+        AttendeeDataSource.Insert();
+        Response.Redirect("/");
     }
 }

@@ -1,16 +1,18 @@
 ﻿<%@ Application Language="C#" %>
 
 <script runat="server">
-
     void Application_Start(object sender, EventArgs e) 
     {
         // Code that runs on application startup
         // if there is a database bound, check to make sure it has the proper tables
         if (CurrentEnvironment.hasDbConnection)
         {
+            Console.WriteLine("Detected an mssql-dev service binding.");
             // make sure tables exist
             Console.WriteLine("Checking to see if tables exist.");
-            AttendeeRepository.checkDatabaseForTables();
+
+            CurrentEnvironment.CheckDBstructure();
+            
         }
     }
     
