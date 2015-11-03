@@ -37,7 +37,7 @@
                         DataSourceID="AttendeeDataSource"
                         EnableViewState="true">
                         <Columns>
-                            <asp:BoundField HeaderText="Attendee ID" DataField="id" InsertVisible="false" ReadOnly="true" />
+                            <asp:BoundField HeaderText="Attendee ID" DataField="id" InsertVisible="false" ReadOnly="true" Visible="false" />
                             <asp:BoundField HeaderText="First Name" DataField="first_name" />
                             <asp:BoundField HeaderText="Last Name" DataField="last_name" />
                             <asp:BoundField HeaderText="Address" DataField="address" />
