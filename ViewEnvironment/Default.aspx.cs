@@ -35,10 +35,11 @@ public partial class _Default : System.Web.UI.Page
         lblInstanceIndex.Text = CurrentEnvironment.InstanceIndex;
         lblInstanceStart.Text = CurrentEnvironment.Uptime;
         lblBoundServices.Text = CurrentEnvironment.BoundServices.ToString();
+        lblDbEngine.Text = CurrentEnvironment.DbEngine.ToString();
 
         // if a database service is bound, show the attendees
         if (CurrentEnvironment.hasDbConnection)
-        {
+        {            
             AttendeeDataSource.ConnectionString = CurrentEnvironment.DbConnectionString;
             // Read
             AttendeeDataSource.SelectCommand = "select * from attendee";
@@ -47,8 +48,13 @@ public partial class _Default : System.Web.UI.Page
             AttendeeDataSource.DeleteCommand = "delete from attendee where id=@id";
             AttendeeDataSource.DeleteParameters.Add("id", System.Data.DbType.Int64, "0");
 
-            // Create
-            AttendeeDataSource.InsertCommand = @"INSERT INTO [dbo].[attendee]
+            
+
+             // SQL Server
+            if (CurrentEnvironment.DbEngine == CurrentEnvironment.DatabaseEngine.SqlServer)
+            {
+                // Create
+                AttendeeDataSource.InsertCommand = @"INSERT INTO [attendee]
                     ([address]
                     ,[city]
                     ,[email_address]
@@ -58,7 +64,7 @@ public partial class _Default : System.Web.UI.Page
                     ,[state]
                     ,[zip_code])
                     VALUES
-                    ('101 W. Fifth St.'
+                    ('123 Main St.'
                     ,'Louisville'
                     ,'user1@example.com'
                     ,'Workshop'
@@ -67,8 +73,7 @@ public partial class _Default : System.Web.UI.Page
                     ,'KY'
                     ,'12345')";
 
-            // Update
-            /*AttendeeDataSource.UpdateCommand = @"update [dbo].[attendee]
+                AttendeeDataSource.UpdateCommand = @"update [attendee]
                     set [address] = @address
                         ,[city] = @city
                         ,[email_address] = @email_address
@@ -78,17 +83,43 @@ public partial class _Default : System.Web.UI.Page
                         ,[state] = @state
                         ,[zip_code] = @zip_code
                     WHERE id=@id";
-             */
-            /* parameters
-            AttendeeDataSource.UpdateParameters.Add("address", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("city", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("email_address", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("first_name", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("last_name", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("phone_number", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("state", System.Data.DbType.String, "");
-            AttendeeDataSource.UpdateParameters.Add("zip_code", System.Data.DbType.String, "");
-             */
+            }
+            else if (CurrentEnvironment.DbEngine == CurrentEnvironment.DatabaseEngine.MySql)
+            {
+                AttendeeDataSource.ProviderName = "MySql.Data.MySqlClient";
+
+                // Create
+                AttendeeDataSource.InsertCommand = @"INSERT INTO `attendee`
+			        (`address`
+                    ,`city`
+                    ,`email_address`
+                    ,`first_name`
+                    ,`last_name`
+                    ,`phone_number`
+                    ,`state`
+                    ,`zip_code`)
+                    VALUES
+                    ('123 Main St.'
+                    ,'Louisville'
+                    ,'user1@example.com'
+                    ,'Workshop'
+                    ,'Participant'
+                    ,'502-123-4567'
+                    ,'KY'
+                    ,'12345')";
+
+                AttendeeDataSource.UpdateCommand = @"UPDATE `attendee`
+                        SET
+                            `address` = @address,
+                            `city` = @city,
+                            `email_address` = @email_address,
+                            `first_name` = @first_name,
+                            `last_name` = @last_name,
+                            `phone_number` = @phone_number,
+                            `state` = @state,
+                            `zip_code` = @zip_code
+                            WHERE `id` = @id;";
+            }
 
             if (!IsPostBack)
             {

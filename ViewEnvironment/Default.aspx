@@ -54,17 +54,7 @@
                 <asp:SqlDataSource
                     ID="AttendeeDataSource"
                     runat="server"
-                    DataSourceMode="DataReader"
-                    UpdateCommand="update [dbo].[attendee]
-                    set [address] = @address
-                        ,[city] = @city
-                        ,[email_address] = @email_address
-                        ,[first_name] = @first_name
-                        ,[last_name] = @last_name
-                        ,[phone_number] = @phone_number
-                        ,[state] = @state
-                        ,[zip_code] = @zip_code
-                    WHERE id=@id"></asp:SqlDataSource>
+                    DataSourceMode="DataReader"></asp:SqlDataSource>
             </div>
             <div class="row">
                 <div class="large-12 columns">
@@ -98,6 +88,10 @@
                         <p>
                             The bound services are <em>
                                 <asp:Label ID="lblBoundServices" runat="server"></asp:Label></em>
+                        </p>
+                        <p>
+                            The detected DB engine is <em>
+                                <asp:Label ID="lblDbEngine" runat="server"></asp:Label></em>
                         </p>
                     </div>
                     <hr />

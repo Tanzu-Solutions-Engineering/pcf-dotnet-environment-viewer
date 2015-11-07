@@ -7,10 +7,6 @@
         // if there is a database bound, check to make sure it has the proper tables
         if (CurrentEnvironment.hasDbConnection)
         {
-            Console.WriteLine("Detected an mssql-dev service binding.");
-            // make sure tables exist
-            Console.WriteLine("Checking to see if tables exist.");
-
             CurrentEnvironment.CheckDBstructure();
             
         }
@@ -26,6 +22,7 @@
     {
         Exception lastError = Server.GetLastError();
         Console.WriteLine("Unhandled exception: " + lastError.Message + lastError.StackTrace);
+        CurrentEnvironment.KillApp();
 
     }
 

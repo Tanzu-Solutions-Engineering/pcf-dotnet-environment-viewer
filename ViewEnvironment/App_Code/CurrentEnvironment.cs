@@ -5,6 +5,7 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using System.Data.SqlClient;
 using System.Data;
+using MySql.Data.MySqlClient;
 
 /// <summary>
 /// Evaluates the running environment.
@@ -22,7 +23,7 @@ public class CurrentEnvironment
     /// </summary>
     static CurrentEnvironment()
     {
-        // Not on cloud foundry so filling in the blanks.
+        // Not on cloud foundry filling in the blanks.
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(INSTANCE_GUID_ENV_VARIABLE_NAME)))
         {
             Environment.SetEnvironmentVariable(BOUND_SERVICES_ENV_VARIABLE_NAME, "{}");
@@ -30,6 +31,29 @@ public class CurrentEnvironment
             Environment.SetEnvironmentVariable(INSTANCE_GUID_ENV_VARIABLE_NAME, NOT_ON_CLOUD_FOUNDRY_MESSAGE);
             Environment.SetEnvironmentVariable(INSTANCE_INDEX_ENV_VARIABLE_NAME, NOT_ON_CLOUD_FOUNDRY_MESSAGE);
         }
+
+        // check to see if DB is bound, if so...what type
+        // sql server first
+        if (BoundServices.GetValue("mssql-dev") != null) // sql server
+        {
+            DbEngine = DatabaseEngine.SqlServer;
+            _connectionString = BoundServices["mssql-dev"][0]["credentials"]["connectionString"].ToString();
+        }
+        else if (BoundServices.GetValue("p-mysql") != null)
+        {
+            DbEngine = DatabaseEngine.MySql;;
+            MySqlConnectionStringBuilder csbuilder = new MySqlConnectionStringBuilder();
+            csbuilder.Add("server", BoundServices["p-mysql"][0]["credentials"]["hostname"].ToString());
+            csbuilder.Add("port", BoundServices["p-mysql"][0]["credentials"]["port"].ToString());
+            csbuilder.Add("uid", BoundServices["p-mysql"][0]["credentials"]["username"].ToString());
+            csbuilder.Add("pwd", BoundServices["p-mysql"][0]["credentials"]["password"].ToString());
+            csbuilder.Add("database", BoundServices["p-mysql"][0]["credentials"]["name"].ToString());
+            _connectionString = csbuilder.ToString();
+        }
+        else
+            DbEngine = DatabaseEngine.None;
+
+    
     }
 
     /// <summary>
@@ -85,19 +109,13 @@ public class CurrentEnvironment
         get { return JObject.Parse(Environment.GetEnvironmentVariable(BOUND_SERVICES_ENV_VARIABLE_NAME)); }
     }
 
+    private static string _connectionString = string.Empty;
     /// <summary>
     /// Detect a bound service for database, no database found will return an empty string.  Currently only supports SQL Server
     /// </summary>
     public static string DbConnectionString
     {
-        get
-        {
-            // first check for sql server
-            if (BoundServices.GetValue("mssql-dev") != null)
-                return BoundServices["mssql-dev"][0]["credentials"]["connectionString"].ToString();
-            else // no database
-                return string.Empty;
-        }
+        get { return _connectionString; }
     }
 
     /// <summary>
@@ -105,7 +123,16 @@ public class CurrentEnvironment
     /// </summary>
     public static bool hasDbConnection
     {
-        get { return DbConnectionString != string.Empty ? true : false; }
+        get { return DbEngine != DatabaseEngine.None ? true : false; }
+    }
+
+    /// <summary>
+    /// Tells which DB engine was detected during app startup.
+    /// </summary>
+    public static DatabaseEngine DbEngine
+    {
+        get;
+        set;
     }
 
     /// <summary>
@@ -113,11 +140,17 @@ public class CurrentEnvironment
     /// </summary>
     public static void CheckDBstructure()
     {
-        using (SqlConnection conn = new SqlConnection(CurrentEnvironment.DbConnectionString))
-        // if the table doesn't exist, create it
-        using (SqlCommand command = new SqlCommand()
+        Console.WriteLine("Checking DB structure.");
+        if (DbEngine == DatabaseEngine.SqlServer)
         {
-            CommandText = @"IF (NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+            Console.WriteLine("Detected an mssql-dev service binding.");
+            // make sure tables exist
+           
+            using (SqlConnection conn = new SqlConnection(CurrentEnvironment.DbConnectionString))
+            // if the table doesn't exist, create it
+            using (SqlCommand command = new SqlCommand()
+            {
+                CommandText = @"IF (NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'attendee'))
                 BEGIN
                     CREATE TABLE attendee (
@@ -129,42 +162,60 @@ public class CurrentEnvironment
                     last_name varchar(255) DEFAULT NULL,
                     phone_number varchar(255) DEFAULT NULL,
                     state varchar(255) DEFAULT NULL,
-                    zip_code varchar(255) DEFAULT NULL)
-
-                    INSERT INTO [dbo].[attendee]
-                    ([address]
-                    ,[city]
-                    ,[email_address]
-                    ,[first_name]
-                    ,[last_name]
-                    ,[phone_number]
-                    ,[state]
-                    ,[zip_code])
-                    VALUES
-                    ('101 W. Fifth St.'
-                    ,'Louisville'
-                    ,'user1@example.com'
-                    ,'Workshop'
-                    ,'Participant'
-                    ,'502-123-4567'
-                    ,'KY'
-                    ,'12345')
-            
+                    zip_code varchar(255) DEFAULT NULL)            
                 END",
-            Connection = conn,
-            CommandType = CommandType.Text
-        })
-        {
-            conn.Open();
-            int rows = command.ExecuteNonQuery();
-            if (rows > -1)
-                Console.WriteLine("table didn't exist, creating it: " + rows + " rows affected.");
+                Connection = conn,
+                CommandType = CommandType.Text
+            })
+            {
+                conn.Open();
+                int rows = command.ExecuteNonQuery();
+                if (rows > -1)
+                    Console.WriteLine("table didn't exist, creating it: " + rows + " rows affected.");
+            }
         }
+        else if (DbEngine == DatabaseEngine.MySql)
+        {
+            using (MySqlConnection conn = new MySqlConnection(CurrentEnvironment.DbConnectionString))
+            // if the table doesn't exist, create it
+            using (MySqlCommand command = new MySqlCommand()
+            {
+                CommandText = @"CREATE TABLE IF NOT EXISTS `attendee` (
+                  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                  `address` varchar(255) DEFAULT NULL,
+                  `city` varchar(255) DEFAULT NULL,
+                  `email_address` varchar(255) DEFAULT NULL,
+                  `first_name` varchar(255) DEFAULT NULL,
+                  `last_name` varchar(255) DEFAULT NULL,
+                  `phone_number` varchar(255) DEFAULT NULL,
+                  `state` varchar(255) DEFAULT NULL,
+                  `zip_code` varchar(255) DEFAULT NULL,
+                  PRIMARY KEY (`id`)
+                ) AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;",
+                Connection = conn,
+                CommandType = CommandType.Text
+            })
+            {
+                conn.Open();
+                int rows = command.ExecuteNonQuery();
+                if (rows > 0)
+                    Console.WriteLine("table didn't exist, creating it: " + rows + " rows affected.");
+            };
+        }
+        else
+            Console.WriteLine("No DB found.");
     }
 
     public static void KillApp()
     {
         Console.WriteLine("Kaboom.");
         Environment.Exit(-1);
+    }
+
+    public enum DatabaseEngine
+    {
+        None=0,
+        SqlServer=1,
+        MySql=2
     }
 }
