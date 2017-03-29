@@ -7,4 +7,7 @@ cd ViewEnvironment
 cf push
 ```
 
+Dependencies:
+* [BOSH Release for Windows](https://network.pivotal.io/products/bosh-release-for-windows) on Pivotal Network
+* [Hostable Web Core Buildpack](https://github.com/cloudfoundry-incubator/hwc-buildpack)
 
