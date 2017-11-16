@@ -1,6 +1,6 @@
 ---
 applications:
-- name: env
+- name: <YOUR INITIALS>-env
   host: env-${random-word}
   memory: 512m
   stack: windows2012R2
