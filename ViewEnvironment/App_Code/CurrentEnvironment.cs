@@ -33,21 +33,31 @@ public class CurrentEnvironment
         }
 
         // check to see if DB is bound, if so...what type
-        // sql server first
-        if (BoundServices.GetValue("mssql-dev") != null) // sql server
+        // SQL server first
+        if (BoundServices.GetValue("azure-sqldb") != null) // Azure SQL Database (Azure Broker)
         {
             DbEngine = DatabaseEngine.SqlServer;
-            _connectionString = BoundServices["mssql-dev"][0]["credentials"]["connectionString"].ToString();
+            SqlConnectionStringBuilder csbuilder = new SqlConnectionStringBuilder();
+            csbuilder.Add("server", BoundServices["azure-sqldb"][0]["credentials"]["hostname"].ToString());
+            csbuilder.Add("uid", BoundServices["azure-sqldb"][0]["credentials"]["username"].ToString());
+            csbuilder.Add("pwd", BoundServices["azure-sqldb"][0]["credentials"]["password"].ToString());
+            csbuilder.Add("database", BoundServices["azure-sqldb"][0]["credentials"]["name"].ToString());
+            _connectionString = csbuilder.ToString();
         }
-        else if (BoundServices.GetValue("p-mysql") != null)
+        else if(BoundServices.GetValue("azure-mysqldb") != null || BoundServices.GetValue("p.mysql") != null) // MySQL for PCF or Mysql for AZURE
         {
-            DbEngine = DatabaseEngine.MySql;;
+            string label = "p.mysql"; // MySQL Database.
+
+            if (BoundServices.GetValue("azure-mysqldb") != null)
+                label = "azure-mysqldb"; //Mysql Database on Azure (Mysql For Azure)
+            
+            DbEngine = DatabaseEngine.MySql;
             MySqlConnectionStringBuilder csbuilder = new MySqlConnectionStringBuilder();
-            csbuilder.Add("server", BoundServices["p-mysql"][0]["credentials"]["hostname"].ToString());
-            csbuilder.Add("port", BoundServices["p-mysql"][0]["credentials"]["port"].ToString());
-            csbuilder.Add("uid", BoundServices["p-mysql"][0]["credentials"]["username"].ToString());
-            csbuilder.Add("pwd", BoundServices["p-mysql"][0]["credentials"]["password"].ToString());
-            csbuilder.Add("database", BoundServices["p-mysql"][0]["credentials"]["name"].ToString());
+            csbuilder.Add("server", BoundServices[label][0]["credentials"]["hostname"].ToString());
+            csbuilder.Add("port", BoundServices[label][0]["credentials"]["port"].ToString());
+            csbuilder.Add("uid", BoundServices[label][0]["credentials"]["username"].ToString());
+            csbuilder.Add("pwd", BoundServices[label][0]["credentials"]["password"].ToString());
+            csbuilder.Add("database", BoundServices[label][0]["credentials"]["name"].ToString());
             _connectionString = csbuilder.ToString();
         }
         else
