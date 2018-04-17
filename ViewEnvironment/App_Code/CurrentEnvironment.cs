@@ -33,8 +33,8 @@ public class CurrentEnvironment
         }
 
         // check to see if DB is bound, if so...what type
-        // sql server first
-        if (BoundServices.GetValue("azure-sqldb") != null) // sql server
+        // SQL server first
+        if (BoundServices.GetValue("azure-sqldb") != null) // Azure SQL Database (Azure Broker)
         {
             DbEngine = DatabaseEngine.SqlServer;
             SqlConnectionStringBuilder csbuilder = new SqlConnectionStringBuilder();
@@ -44,15 +44,20 @@ public class CurrentEnvironment
             csbuilder.Add("database", BoundServices["azure-sqldb"][0]["credentials"]["name"].ToString());
             _connectionString = csbuilder.ToString();
         }
-        else if (BoundServices.GetValue("azure-mysqldb") != null)
+        else if(BoundServices.GetValue("azure-mysqldb") != null || BoundServices.GetValue("p.mysql") != null) // MySQL for PCF or Mysql for AZURE
         {
-            DbEngine = DatabaseEngine.MySql;;
+            string label = "p.mysql"; // MySQL Database.
+
+            if (BoundServices.GetValue("azure-mysqldb") != null)
+                label = "azure-mysqldb"; //Mysql Database on Azure (Mysql For Azure)
+            
+            DbEngine = DatabaseEngine.MySql;
             MySqlConnectionStringBuilder csbuilder = new MySqlConnectionStringBuilder();
-            csbuilder.Add("server", BoundServices["azure-mysqldb"][0]["credentials"]["hostname"].ToString());
-            csbuilder.Add("port", BoundServices["azure-mysqldb"][0]["credentials"]["port"].ToString());
-            csbuilder.Add("uid", BoundServices["azure-mysqldb"][0]["credentials"]["username"].ToString());
-            csbuilder.Add("pwd", BoundServices["azure-mysqldb"][0]["credentials"]["password"].ToString());
-            csbuilder.Add("database", BoundServices["azure-mysqldb"][0]["credentials"]["name"].ToString());
+            csbuilder.Add("server", BoundServices[label][0]["credentials"]["hostname"].ToString());
+            csbuilder.Add("port", BoundServices[label][0]["credentials"]["port"].ToString());
+            csbuilder.Add("uid", BoundServices[label][0]["credentials"]["username"].ToString());
+            csbuilder.Add("pwd", BoundServices[label][0]["credentials"]["password"].ToString());
+            csbuilder.Add("database", BoundServices[label][0]["credentials"]["name"].ToString());
             _connectionString = csbuilder.ToString();
         }
         else
