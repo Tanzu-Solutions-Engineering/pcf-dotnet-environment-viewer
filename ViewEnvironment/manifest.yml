@@ -1,7 +1,7 @@
 ---
 applications:
 - name: dot-net-app-16
-  host: env-${random-word}
+  random-route: true
   memory: 1026m
   stack: windows2016
 #  stack: windows2012R2
