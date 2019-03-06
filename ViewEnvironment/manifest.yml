@@ -4,5 +4,4 @@ applications:
   random-route: true
   memory: 1026m
   stack: windows2016
-#  stack: windows2012R2
   buildpack: hwc_buildpack
