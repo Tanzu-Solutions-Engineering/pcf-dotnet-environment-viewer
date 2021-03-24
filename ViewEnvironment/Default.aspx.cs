@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
 using System.Collections.Generic;
 
 public partial class _Default : System.Web.UI.Page
@@ -90,7 +89,7 @@ public partial class _Default : System.Web.UI.Page
 
                 // Create
                 AttendeeDataSource.InsertCommand = @"INSERT INTO `attendee`
-			        (`address`
+                    (`address`
                     ,`city`
                     ,`email_address`
                     ,`first_name`
