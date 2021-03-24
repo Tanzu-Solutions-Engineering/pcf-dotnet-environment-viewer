@@ -1,7 +1,7 @@
 ---
 applications:
-- name: dot-net-app-16
+- name: dot-net-app
   random-route: true
-  memory: 1026m
-  stack: windows2016
+  memory: 1024MB
+  stack: windows
   buildpack: hwc_buildpack
