@@ -4,4 +4,5 @@ applications:
   random-route: true
   memory: 1024MB
   stack: windows
+  path: ./ViewEnvironment
   buildpack: hwc_buildpack
