@@ -47,9 +47,7 @@ public partial class _Default : System.Web.UI.Page
             AttendeeDataSource.DeleteCommand = "delete from attendee where id=@id";
             AttendeeDataSource.DeleteParameters.Add("id", System.Data.DbType.Int64, "0");
 
-            
-
-             // SQL Server
+            // SQL Server
             if (CurrentEnvironment.DbEngine == CurrentEnvironment.DatabaseEngine.SqlServer)
             {
                 // Create
@@ -108,16 +106,16 @@ public partial class _Default : System.Web.UI.Page
                     ,'12345')";
 
                 AttendeeDataSource.UpdateCommand = @"UPDATE `attendee`
-                        SET
-                            `address` = @address,
-                            `city` = @city,
-                            `email_address` = @email_address,
-                            `first_name` = @first_name,
-                            `last_name` = @last_name,
-                            `phone_number` = @phone_number,
-                            `state` = @state,
-                            `zip_code` = @zip_code
-                            WHERE `id` = @id;";
+                    SET
+                        `address` = @address,
+                        `city` = @city,
+                        `email_address` = @email_address,
+                        `first_name` = @first_name,
+                        `last_name` = @last_name,
+                        `phone_number` = @phone_number,
+                        `state` = @state,
+                        `zip_code` = @zip_code
+                    WHERE `id` = @id;";
             }
 
             if (!IsPostBack)
@@ -131,10 +129,12 @@ public partial class _Default : System.Web.UI.Page
             }
         }
     }
+
     protected void btnKill_Click(object sender, EventArgs e)
     {
         CurrentEnvironment.KillApp();
     }
+    
     protected void btnAddAttendee_Click(object sender, EventArgs e)
     {
         AttendeeDataSource.Insert();
