@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -16,6 +17,8 @@ public class CurrentEnvironment
     private static readonly string INSTANCE_GUID_ENV_VARIABLE_NAME = "INSTANCE_GUID";
     private static readonly string INSTANCE_INDEX_ENV_VARIABLE_NAME = "INSTANCE_INDEX";
     private static readonly string BOUND_SERVICES_ENV_VARIABLE_NAME = "VCAP_SERVICES";
+    private static readonly string SQLSERVER_CONNECTION_STRING_ENV_VARIABLE_NAME = "SQLSERVER_CONNECTION_STRING";
+    private static readonly string MYSQL_CONNECTION_STRING_ENV_VARIABLE_NAME = "MYSQL_CONNECTION_STRING";
     private static readonly string NOT_ON_CLOUD_FOUNDRY_MESSAGE = "Not running in cloud foundry.";
 
     /// <summary>
@@ -32,38 +35,50 @@ public class CurrentEnvironment
             Environment.SetEnvironmentVariable(INSTANCE_INDEX_ENV_VARIABLE_NAME, NOT_ON_CLOUD_FOUNDRY_MESSAGE);
         }
 
-        // check to see if DB is bound, if so...what type
-        // SQL server first
-        if (BoundServices.GetValue("azure-sqldb") != null) // Azure SQL Database (Azure Broker)
+        // check to see if DB is bound via VCAP_SERVICES (CF)
+        // if not, check for environment variables (k8s)
+        // if also not set, check the web.config (local dev)
+        // finally default to no DB
+        if (BoundServices.GetValue("mssql-dev") != null) // sql server
         {
             DbEngine = DatabaseEngine.SqlServer;
-            SqlConnectionStringBuilder csbuilder = new SqlConnectionStringBuilder();
-            csbuilder.Add("server", BoundServices["azure-sqldb"][0]["credentials"]["hostname"].ToString());
-            csbuilder.Add("uid", BoundServices["azure-sqldb"][0]["credentials"]["username"].ToString());
-            csbuilder.Add("pwd", BoundServices["azure-sqldb"][0]["credentials"]["password"].ToString());
-            csbuilder.Add("database", BoundServices["azure-sqldb"][0]["credentials"]["name"].ToString());
-            _connectionString = csbuilder.ToString();
+            _connectionString = BoundServices["mssql-dev"][0]["credentials"]["connectionString"].ToString();
         }
-        else if(BoundServices.GetValue("azure-mysqldb") != null || BoundServices.GetValue("p.mysql") != null) // MySQL for PCF or Mysql for AZURE
+        else if (BoundServices.GetValue("p-mysql") != null)
         {
-            string label = "p.mysql"; // MySQL Database.
-
-            if (BoundServices.GetValue("azure-mysqldb") != null)
-                label = "azure-mysqldb"; //Mysql Database on Azure (Mysql For Azure)
-            
             DbEngine = DatabaseEngine.MySql;
             MySqlConnectionStringBuilder csbuilder = new MySqlConnectionStringBuilder();
-            csbuilder.Add("server", BoundServices[label][0]["credentials"]["hostname"].ToString());
-            csbuilder.Add("port", BoundServices[label][0]["credentials"]["port"].ToString());
-            csbuilder.Add("uid", BoundServices[label][0]["credentials"]["username"].ToString());
-            csbuilder.Add("pwd", BoundServices[label][0]["credentials"]["password"].ToString());
-            csbuilder.Add("database", BoundServices[label][0]["credentials"]["name"].ToString());
+            csbuilder.Add("server", BoundServices["p-mysql"][0]["credentials"]["hostname"].ToString());
+            csbuilder.Add("port", BoundServices["p-mysql"][0]["credentials"]["port"].ToString());
+            csbuilder.Add("uid", BoundServices["p-mysql"][0]["credentials"]["username"].ToString());
+            csbuilder.Add("pwd", BoundServices["p-mysql"][0]["credentials"]["password"].ToString());
+            csbuilder.Add("database", BoundServices["p-mysql"][0]["credentials"]["name"].ToString());
             _connectionString = csbuilder.ToString();
         }
+        else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(SQLSERVER_CONNECTION_STRING_ENV_VARIABLE_NAME)))
+        {
+            DbEngine = DatabaseEngine.SqlServer;
+            _connectionString = Environment.GetEnvironmentVariable(SQLSERVER_CONNECTION_STRING_ENV_VARIABLE_NAME);
+        }
+        else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(MYSQL_CONNECTION_STRING_ENV_VARIABLE_NAME)))
+        {
+            DbEngine = DatabaseEngine.MySql;
+            _connectionString = Environment.GetEnvironmentVariable(MYSQL_CONNECTION_STRING_ENV_VARIABLE_NAME);
+        }
+        else if (ConfigurationManager.ConnectionStrings["sqlserver"] != null)
+        {
+            DbEngine = DatabaseEngine.SqlServer;
+            _connectionString = ConfigurationManager.ConnectionStrings["sqlserver"].ConnectionString;
+        }
+        else if (ConfigurationManager.ConnectionStrings["mysql"] != null)
+        {
+            DbEngine = DatabaseEngine.MySql;
+            _connectionString = ConfigurationManager.ConnectionStrings["mysql"].ConnectionString;
+        }
         else
+        {
             DbEngine = DatabaseEngine.None;
-
-    
+        }
     }
 
     /// <summary>
@@ -213,7 +228,9 @@ public class CurrentEnvironment
             };
         }
         else
+        {
             Console.WriteLine("No DB found.");
+        }
     }
 
     public static void KillApp()
